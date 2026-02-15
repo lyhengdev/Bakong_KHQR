@@ -45,10 +45,6 @@ const shouldGenerateDeeplinkInBackground = () => {
   return mode !== 'sync';
 };
 
-const isDemoManualSettleEnabled = () => (
-  String(process.env.DEMO_MANUAL_SETTLE_ENABLED || 'true').toLowerCase() !== 'false'
-);
-
 const isLikelyPendingMessage = (message) => {
   if (typeof message !== 'string' || !message.trim()) {
     return false;
@@ -271,7 +267,6 @@ app.post('/api/khqr/generate', async (req, res) => {
         deeplinkUrl,
         amount: parsedAmount,
         currency: resolvedCurrency,
-        manualSettleEnabled: isDemoManualSettleEnabled(),
       },
     };
 
@@ -304,25 +299,6 @@ app.post('/api/payment/check', async (req, res) => {
     }
 
     const payment = payments.get(md5);
-    if (payment && payment.manualSettledAt) {
-      return res.json({
-        success: true,
-        status: 'completed',
-        data: {
-          hash: payment.transactionHash || null,
-          fromAccountId: payment.fromAccount || 'demo@manual',
-          amount: payment.amount,
-          currency: payment.currency,
-        },
-        deeplinkUrl: payment.deeplinkUrl || null,
-        message: 'Payment marked as completed manually (demo mode)',
-        errorCode: null,
-        checkedBy: 'manual',
-        provider: null,
-        warning: 'Demo manual settle override is enabled.',
-        manualSettleEnabled: isDemoManualSettleEnabled(),
-      });
-    }
 
     // Check with Bakong API (primary: md5)
     let result = await bakongAPI.checkTransactionByMD5(md5);
@@ -404,65 +380,10 @@ app.post('/api/payment/check', async (req, res) => {
         fallback: fallbackProvider,
       },
       warning,
-      manualSettleEnabled: isDemoManualSettleEnabled(),
     });
   } catch (error) {
     console.error('Error checking payment:', error);
     res.status(500).json({
-      success: false,
-      error: error.message,
-    });
-  }
-});
-
-/**
- * Mark payment as completed manually (demo fallback)
- */
-app.post('/api/payment/mark-paid', (req, res) => {
-  try {
-    if (!isDemoManualSettleEnabled()) {
-      return res.status(403).json({
-        success: false,
-        error: 'Manual settle mode is disabled',
-      });
-    }
-
-    const { md5, fromAccountId, transactionHash } = req.body || {};
-    if (!md5) {
-      return res.status(400).json({
-        success: false,
-        error: 'MD5 hash is required',
-      });
-    }
-
-    const payment = payments.get(md5);
-    if (!payment) {
-      return res.status(404).json({
-        success: false,
-        error: 'Payment not found',
-      });
-    }
-
-    payment.status = 'completed';
-    payment.completedAt = new Date().toISOString();
-    payment.manualSettledAt = payment.completedAt;
-    payment.fromAccount = normalizeOptionalText(fromAccountId) || 'demo@manual';
-    payment.transactionHash = normalizeOptionalText(transactionHash) || `manual-${Date.now()}`;
-    payments.set(md5, payment);
-
-    return res.json({
-      success: true,
-      status: 'completed',
-      message: 'Payment marked as completed manually (demo mode)',
-      data: {
-        md5,
-        ...payment,
-      },
-      manualSettleEnabled: true,
-    });
-  } catch (error) {
-    console.error('Error manually completing payment:', error);
-    return res.status(500).json({
       success: false,
       error: error.message,
     });
