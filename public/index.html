@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bakong KHQR Payment Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #f3f8ff;
+      --bg-warm: #fff7ea;
+      --bg-panel: #ffffff;
+      --bg-panel-muted: #f5f9fe;
+      --text-primary: #11233a;
+      --text-muted: #5d6f86;
+      --primary: #0b6d98;
+      --primary-strong: #064f70;
+      --accent: #1273de;
+      --success: #1e7d3f;
+      --warning: #b56704;
+      --danger: #b4232f;
+      --border: #dbe7f4;
+      --shadow-soft: 0 14px 34px rgba(17, 35, 58, 0.08);
+      --shadow-strong: 0 20px 50px rgba(17, 35, 58, 0.12);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Sora', 'Avenir Next', 'Trebuchet MS', 'Segoe UI', sans-serif;
+      color: var(--text-primary);
+      background:
+        radial-gradient(circle at 8% 10%, rgba(18, 115, 222, 0.22), transparent 30%),
+        radial-gradient(circle at 90% 4%, rgba(11, 109, 152, 0.18), transparent 24%),
+        radial-gradient(circle at 80% 85%, rgba(255, 187, 85, 0.2), transparent 28%),
+        linear-gradient(165deg, var(--bg-page) 0%, #eff6ff 55%, var(--bg-warm) 100%);
+      min-height: 100vh;
+      padding: 30px 18px 44px;
+    }
+
+    .page-shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      animation: rise-in 0.6s ease-out;
+    }
+
+    .hero {
+      background: linear-gradient(118deg, rgba(11, 109, 152, 0.95), rgba(18, 115, 222, 0.92));
+      border-radius: var(--radius-xl);
+      color: #ffffff;
+      padding: 28px 28px 24px;
+      box-shadow: var(--shadow-strong);
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -60px;
+      top: -80px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0));
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .hero h1 {
+      font-family: 'Manrope', 'Sora', sans-serif;
+      font-size: clamp(1.65rem, 3vw, 2.3rem);
+      line-height: 1.2;
+      margin-bottom: 8px;
+      letter-spacing: 0.2px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero p {
+      max-width: 760px;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-metrics {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .metric {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      padding: 7px 13px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      backdrop-filter: blur(8px);
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .secondary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--bg-panel);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      padding: 22px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(17, 35, 58, 0.12);
+    }
+
+    .panel h2 {
+      font-family: 'Manrope', 'Sora', sans-serif;
+      font-size: 1.22rem;
+      margin-bottom: 14px;
+      letter-spacing: 0.1px;
+    }
+
+    .panel-subtitle {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 13px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: #26384e;
+      margin-bottom: 7px;
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1.6px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg-panel-muted);
+      padding: 11px 12px;
+      font: inherit;
+      color: var(--text-primary);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .input::placeholder,
+    .textarea::placeholder {
+      color: #8c9bb0;
+    }
+
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      outline: none;
+      background: #ffffff;
+      border-color: rgba(18, 115, 222, 0.72);
+      box-shadow: 0 0 0 4px rgba(18, 115, 222, 0.14);
+    }
+
+    .btn,
+    button {
+      border: none;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, filter 0.2s ease;
+    }
+
+    .btn-primary,
+    #generateBtn,
+    #checkStatusBtn,
+    #checkAccountBtn,
+    #decodeBtn {
+      background: linear-gradient(140deg, var(--accent), #0a6dc8);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(18, 115, 222, 0.26);
+    }
+
+    .btn-secondary,
+    #refreshBtn,
+    #deeplinkBtn {
+      background: #ffffff;
+      color: var(--primary-strong);
+      border: 1px solid rgba(11, 109, 152, 0.32);
+    }
+
+    .btn,
+    #generateBtn,
+    #checkStatusBtn,
+    #refreshBtn,
+    #checkAccountBtn,
+    #deeplinkBtn,
+    #decodeBtn {
+      min-height: 44px;
+      width: 100%;
+      padding: 10px 16px;
+    }
+
+    .btn:hover,
+    #generateBtn:hover,
+    #checkStatusBtn:hover,
+    #refreshBtn:hover,
+    #checkAccountBtn:hover,
+    #deeplinkBtn:hover,
+    #decodeBtn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.02);
+    }
+
+    .btn:active,
+    #generateBtn:active,
+    #checkStatusBtn:active,
+    #refreshBtn:active,
+    #checkAccountBtn:active,
+    #deeplinkBtn:active,
+    #decodeBtn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled,
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.76;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .button-row {
+      display: grid;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .notice,
+    .error-message,
+    .success-message {
+      margin-top: 12px;
+      border-radius: 11px;
+      padding: 10px 12px;
+      display: none;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.45;
+      font-size: 0.9rem;
+      border: 1px solid transparent;
+    }
+
+    .notice.active,
+    .error-message.active,
+    .success-message.active {
+      display: flex;
+      animation: fade-in 0.22s ease;
+    }
+
+    .notice-error {
+      background: #fff1f2;
+      border-color: #fecdd3;
+      color: var(--danger);
+    }
+
+    .notice-warning {
+      background: #fff7e6;
+      border-color: #f8d7a3;
+      color: var(--warning);
+    }
+
+    .notice-success {
+      background: #ecfdf3;
+      border-color: #bde8ca;
+      color: var(--success);
+    }
+
+    .qr-display {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, #fbfdff 0%, #f6fbff 100%);
+      padding: 16px;
+      display: none;
+    }
+
+    .qr-display.active {
+      display: block;
+      animation: rise-in 0.35s ease;
+    }
+
+    .qr-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .qr-title {
+      font-family: 'Manrope', 'Sora', sans-serif;
+      font-size: 1.05rem;
+      margin: 0;
+    }
+
+    .status {
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status.pending {
+      color: #8a5a03;
+      background: #ffefcf;
+      border: 1px solid #f6d89f;
+    }
+
+    .status.completed {
+      color: #0f6a33;
+      background: #dff7e8;
+      border: 1px solid #b6e8c7;
+    }
+
+    .status.failed {
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+    }
+
+    .status.error {
+      color: #0b4d7a;
+      background: #dceefe;
+      border: 1px solid #b9daf9;
+    }
+
+    .qr-body {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    #qrImage {
+      width: min(100%, 230px);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      padding: 8px;
+      justify-self: center;
+    }
+
+    .payment-info {
+      background: #ffffff;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.88rem;
+    }
+
+    .info-row .label {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .info-row .value {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      font-weight: 600;
+    }
+
+    .value.mono {
+      font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      color: #2e425b;
+    }
+
+    .history-actions {
+      margin-bottom: 14px;
+    }
+
+    .payments-list {
+      min-height: 230px;
+      max-height: 560px;
+      overflow-y: auto;
+      padding-right: 3px;
+    }
+
+    .payments-list::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    .payments-list::-webkit-scrollbar-thumb {
+      background: #bfd2e7;
+      border-radius: 99px;
+    }
+
+    .payment-item {
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 13px;
+      background: #ffffff;
+      padding: 12px;
+      margin-bottom: 10px;
+      animation: fade-in 0.22s ease;
+    }
+
+    .payment-item h4 {
+      font-family: 'Manrope', 'Sora', sans-serif;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .payment-item p {
+      color: #30435b;
+      font-size: 0.84rem;
+      line-height: 1.5;
+      margin-bottom: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .payment-item p:last-child {
+      margin-bottom: 0;
+    }
+
+    .payment-empty {
+      height: 100%;
+      min-height: 210px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border: 1px dashed #c7d8ea;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fafdff 0%, #f3f8ff 100%);
+      color: #607289;
+      font-size: 0.94rem;
+      padding: 18px;
+    }
+
+    .inline-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .inline-form button {
+      width: auto;
+      min-width: 132px;
+      padding-inline: 22px;
+    }
+
+    .decode-result {
+      margin-top: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f7fbff;
+      padding: 11px;
+      display: none;
+    }
+
+    .decode-result.active {
+      display: block;
+      animation: fade-in 0.22s ease;
+    }
+
+    .decode-result .meta {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .decode-result pre {
+      margin: 0;
+      max-height: 240px;
+      overflow: auto;
+      font-size: 0.78rem;
+      line-height: 1.48;
+      color: #22364e;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    }
+
+    .loading {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-top-color: #ffffff;
+      display: inline-block;
+      animation: spin 0.85s linear infinite;
+      margin-right: 7px;
+      vertical-align: text-bottom;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes rise-in {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(8px);
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .workspace-grid,
+      .secondary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 20px;
+      }
+
+      .qr-body {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 24px 22px;
+      }
+    }
+
+    @media (max-width: 740px) {
+      body {
+        padding: 18px 12px 24px;
+      }
+
+      .hero h1 {
+        font-size: 1.56rem;
+      }
+
+      .form-row,
+      .inline-form {
+        grid-template-columns: 1fr;
+      }
+
+      .inline-form button {
+        width: 100%;
+      }
+
+      .info-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+
+      .qr-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="hero">
+      <h1>Bakong KHQR Payment Console</h1>
+      <p>Create payment QR requests, check transaction status, and validate Bakong accounts from one test-ready interface.</p>
+      <div class="hero-metrics">
+        <span class="metric">Supports USD and KHR</span>
+        <span class="metric">Real-time status checks</span>
+        <span class="metric">Account verification</span>
+      </div>
+    </section>
+
+    <section class="workspace-grid">
+      <article class="panel">
+        <h2>Generate Payment</h2>
+        <p class="panel-subtitle">Create a KHQR payload with optional metadata, then share or scan the QR for payment collection.</p>
+
+        <form id="generateForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="amount">Amount *</label>
+              <input class="input" type="number" id="amount" step="0.01" min="0.01" required placeholder="10.00">
+            </div>
+            <div class="form-group">
+              <label for="currency">Currency *</label>
+              <select class="select" id="currency" required>
+                <option value="USD">USD ($)</option>
+                <option value="KHR">KHR</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="billNumber">Bill Number (optional)</label>
+            <input class="input" type="text" id="billNumber" placeholder="INV-001">
+          </div>
+
+          <div class="form-group">
+            <label for="storeLabel">Store Label (optional)</label>
+            <input class="input" type="text" id="storeLabel" placeholder="Main branch POS">
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description (optional)</label>
+            <textarea class="textarea" id="description" placeholder="Payment details"></textarea>
+          </div>
+
+          <div class="button-row">
+            <button type="submit" id="generateBtn">Generate KHQR</button>
+          </div>
+        </form>
+
+        <div id="errorMessage" class="notice error-message" role="alert" aria-live="polite"></div>
+        <div id="successMessage" class="notice success-message" role="status" aria-live="polite"></div>
+
+        <section id="qrDisplay" class="qr-display" aria-live="polite">
+          <div class="qr-head">
+            <h3 class="qr-title">Payment QR</h3>
+            <span id="displayStatus" class="status pending">Pending</span>
+          </div>
+
+          <div class="qr-body">
+            <img id="qrImage" src="" alt="Generated KHQR code">
+
+            <div class="payment-info">
+              <div class="info-row">
+                <span class="label">Bill Number</span>
+                <span id="displayBillNumber" class="value">-</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Amount</span>
+                <span id="displayAmount" class="value">-</span>
+              </div>
+              <div class="info-row">
+                <span class="label">MD5</span>
+                <span id="displayMd5" class="value mono">-</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="button-row" style="margin-top: 14px;">
+            <button id="deeplinkBtn" class="btn-secondary" style="display: none;">Open in Bakong App</button>
+            <button id="checkStatusBtn">Check Payment Status</button>
+          </div>
+        </section>
+      </article>
+
+      <article class="panel">
+        <h2>Payment History</h2>
+        <p class="panel-subtitle">Review recently generated requests and monitor their final status.</p>
+
+        <div class="history-actions">
+          <button id="refreshBtn" class="btn-secondary">Refresh Payments</button>
+        </div>
+
+        <div id="paymentsList" class="payments-list">
+          <div class="payment-empty">No payments yet. Generate a KHQR request to start tracking history.</div>
+        </div>
+      </article>
+    </section>
+
+    <section class="secondary-grid">
+      <article class="panel">
+        <h2>Check Bakong Account</h2>
+        <p class="panel-subtitle">Validate whether a Bakong account ID can be found before accepting payment.</p>
+
+        <div class="inline-form">
+          <input type="text" id="checkAccountId" class="input" placeholder="username@bank" autocomplete="off">
+          <button id="checkAccountBtn">Check</button>
+        </div>
+
+        <div id="accountCheckResult" class="notice" role="status" aria-live="polite"></div>
+      </article>
+
+      <article class="panel">
+        <h2>Decode KHQR</h2>
+        <p class="panel-subtitle">Paste a KHQR payload to inspect decoded content and validation status.</p>
+
+        <div class="form-group">
+          <label for="decodeInput">KHQR Payload</label>
+          <textarea id="decodeInput" class="textarea" placeholder="000201..."></textarea>
+        </div>
+
+        <button id="decodeBtn">Decode QR String</button>
+
+        <div id="decodeResult" class="decode-result">
+          <p id="decodeMeta" class="meta"></p>
+          <pre id="decodeJson"></pre>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = window.location.origin;
+    let currentPaymentMd5 = null;
+    let deeplinkPollTimer = null;
+
+    const elements = {
+      generateForm: document.getElementById('generateForm'),
+      amount: document.getElementById('amount'),
+      currency: document.getElementById('currency'),
+      billNumber: document.getElementById('billNumber'),
+      storeLabel: document.getElementById('storeLabel'),
+      description: document.getElementById('description'),
+      generateBtn: document.getElementById('generateBtn'),
+      errorMessage: document.getElementById('errorMessage'),
+      successMessage: document.getElementById('successMessage'),
+      qrDisplay: document.getElementById('qrDisplay'),
+      qrImage: document.getElementById('qrImage'),
+      displayBillNumber: document.getElementById('displayBillNumber'),
+      displayAmount: document.getElementById('displayAmount'),
+      displayStatus: document.getElementById('displayStatus'),
+      displayMd5: document.getElementById('displayMd5'),
+      deeplinkBtn: document.getElementById('deeplinkBtn'),
+      checkStatusBtn: document.getElementById('checkStatusBtn'),
+      paymentsList: document.getElementById('paymentsList'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      checkAccountId: document.getElementById('checkAccountId'),
+      checkAccountBtn: document.getElementById('checkAccountBtn'),
+      accountCheckResult: document.getElementById('accountCheckResult'),
+      decodeInput: document.getElementById('decodeInput'),
+      decodeBtn: document.getElementById('decodeBtn'),
+      decodeResult: document.getElementById('decodeResult'),
+      decodeMeta: document.getElementById('decodeMeta'),
+      decodeJson: document.getElementById('decodeJson')
+    };
+
+    const escapeHtml = (value) => {
+      if (value === null || value === undefined) {
+        return '';
+      }
+
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    };
+
+    const setButtonLoading = (button, isLoading, loadingText) => {
+      if (isLoading) {
+        button.dataset.originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = `<span class="loading" aria-hidden="true"></span>${loadingText}`;
+        return;
+      }
+
+      button.disabled = false;
+      if (button.dataset.originalText) {
+        button.innerHTML = button.dataset.originalText;
+        delete button.dataset.originalText;
+      }
+    };
+
+    const setNotice = (element, type, message) => {
+      element.classList.remove('active', 'notice-error', 'notice-success', 'notice-warning');
+      if (!message) {
+        element.textContent = '';
+        return;
+      }
+
+      element.textContent = message;
+      if (type) {
+        element.classList.add(type);
+      }
+      element.classList.add('active');
+    };
+
+    const setStatus = (status) => {
+      const mapping = {
+        pending: 'Pending',
+        completed: 'Completed',
+        failed: 'Failed',
+        error: 'Status Error'
+      };
+
+      const resolvedStatus = mapping[status] ? status : 'pending';
+      elements.displayStatus.textContent = mapping[resolvedStatus];
+      elements.displayStatus.className = `status ${resolvedStatus}`;
+    };
+
+    const stopDeeplinkPolling = () => {
+      if (deeplinkPollTimer) {
+        clearInterval(deeplinkPollTimer);
+        deeplinkPollTimer = null;
+      }
+    };
+
+    const showDeeplinkButton = (url) => {
+      if (!url) {
+        elements.deeplinkBtn.style.display = 'none';
+        elements.deeplinkBtn.onclick = null;
+        return;
+      }
+
+      elements.deeplinkBtn.style.display = 'block';
+      elements.deeplinkBtn.onclick = () => window.open(url, '_blank', 'noopener,noreferrer');
+    };
+
+    const startDeeplinkPolling = (md5) => {
+      stopDeeplinkPolling();
+      if (!md5) {
+        return;
+      }
+
+      let attempts = 0;
+      const maxAttempts = 12;
+      const intervalMs = 1500;
+
+      deeplinkPollTimer = setInterval(async () => {
+        attempts += 1;
+
+        try {
+          const response = await fetch(`${API_BASE}/api/payment-md5/${encodeURIComponent(md5)}`);
+          const result = await response.json();
+
+          if (response.ok && result.success && result.data?.deeplinkUrl) {
+            showDeeplinkButton(result.data.deeplinkUrl);
+            stopDeeplinkPolling();
+            return;
+          }
+        } catch (_error) {
+          // Ignore transient polling errors.
+        }
+
+        if (attempts >= maxAttempts) {
+          stopDeeplinkPolling();
+        }
+      }, intervalMs);
+    };
+
+    const formatMoney = (amount, currency) => {
+      const parsedAmount = Number(amount);
+      if (!Number.isFinite(parsedAmount)) {
+        return `${amount} ${currency}`;
+      }
+
+      const formatted = currency === 'KHR'
+        ? parsedAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })
+        : parsedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      return `${formatted} ${currency}`;
+    };
+
+    const renderPayments = (payments) => {
+      if (!Array.isArray(payments) || payments.length === 0) {
+        elements.paymentsList.innerHTML = '<div class="payment-empty">No payments yet. Generate a KHQR request to start tracking history.</div>';
+        return;
+      }
+
+      const sorted = [...payments].sort((a, b) => {
+        const aDate = new Date(a.createdAt || 0).getTime();
+        const bDate = new Date(b.createdAt || 0).getTime();
+        return bDate - aDate;
+      });
+
+      const html = sorted.map((payment) => {
+        const createdAt = payment.createdAt ? new Date(payment.createdAt).toLocaleString() : '-';
+        const status = payment.status || 'pending';
+        const description = payment.description
+          ? `<p><strong>Description:</strong> ${escapeHtml(payment.description)}</p>`
+          : '';
+
+        return `
+          <div class="payment-item">
+            <h4>${escapeHtml(payment.billNumber || 'Unnamed Payment')}</h4>
+            <p><strong>Amount:</strong> ${escapeHtml(formatMoney(payment.amount, payment.currency || 'USD'))}</p>
+            <p><strong>Status:</strong> <span class="status ${escapeHtml(status)}">${escapeHtml(status)}</span></p>
+            <p><strong>Created:</strong> ${escapeHtml(createdAt)}</p>
+            ${description}
+          </div>
+        `;
+      }).join('');
+
+      elements.paymentsList.innerHTML = html;
+    };
+
+    const loadPayments = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/payments`);
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          renderPayments(result.data || []);
+          return;
+        }
+
+        elements.paymentsList.innerHTML = '<div class="payment-empty">Unable to load payments right now.</div>';
+      } catch (_error) {
+        elements.paymentsList.innerHTML = '<div class="payment-empty">Network error while loading payments.</div>';
+      }
+    };
+
+    elements.generateForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setNotice(elements.errorMessage, '', '');
+      setNotice(elements.successMessage, '', '');
+      elements.qrDisplay.classList.remove('active');
+
+      setButtonLoading(elements.generateBtn, true, 'Generating...');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/khqr/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: elements.amount.value,
+            currency: elements.currency.value,
+            billNumber: elements.billNumber.value,
+            storeLabel: elements.storeLabel.value,
+            description: elements.description.value
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          setNotice(elements.errorMessage, 'notice-error', result.error || 'Failed to generate payment.');
+          return;
+        }
+
+        currentPaymentMd5 = result.data.md5;
+        stopDeeplinkPolling();
+
+        elements.qrImage.src = result.data.qrCodeImage;
+        elements.displayBillNumber.textContent = result.data.billNumber;
+        elements.displayAmount.textContent = formatMoney(result.data.amount, result.data.currency);
+        elements.displayMd5.textContent = result.data.md5;
+        setStatus('pending');
+
+        if (result.data.deeplinkUrl) {
+          showDeeplinkButton(result.data.deeplinkUrl);
+        } else {
+          showDeeplinkButton(null);
+          startDeeplinkPolling(result.data.md5);
+        }
+
+        if (result.warning) {
+          setNotice(elements.errorMessage, 'notice-warning', result.warning);
+        }
+
+        setNotice(elements.successMessage, 'notice-success', 'KHQR generated successfully.');
+        elements.qrDisplay.classList.add('active');
+
+        await loadPayments();
+      } catch (error) {
+        setNotice(elements.errorMessage, 'notice-error', `Network error: ${error.message}`);
+      } finally {
+        setButtonLoading(elements.generateBtn, false);
+      }
+    });
+
+    elements.checkStatusBtn.addEventListener('click', async () => {
+      setNotice(elements.errorMessage, '', '');
+      setNotice(elements.successMessage, '', '');
+
+      if (!currentPaymentMd5) {
+        setNotice(elements.errorMessage, 'notice-warning', 'Generate a payment before checking status.');
+        return;
+      }
+
+      setButtonLoading(elements.checkStatusBtn, true, 'Checking...');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/payment/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ md5: currentPaymentMd5 })
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          setNotice(elements.errorMessage, 'notice-error', result.error || 'Unable to check payment status.');
+          return;
+        }
+
+        if (result.deeplinkUrl) {
+          showDeeplinkButton(result.deeplinkUrl);
+          stopDeeplinkPolling();
+        }
+
+        setStatus(result.status);
+
+        if (result.status === 'completed') {
+          setNotice(elements.errorMessage, '', '');
+          const successMessage = result.warning
+            ? `Payment completed successfully. ${result.warning}`
+            : 'Payment completed successfully.';
+          setNotice(elements.successMessage, 'notice-success', successMessage);
+        } else if (result.status === 'failed') {
+          setNotice(elements.successMessage, '', '');
+          setNotice(elements.errorMessage, 'notice-error', result.message || 'Payment failed.');
+        } else if (result.status === 'error') {
+          setNotice(elements.successMessage, '', '');
+          const providerHint = result.provider
+            ? ` (responseCode: ${result.provider.responseCode ?? 'n/a'}, errorCode: ${result.provider.errorCode ?? 'n/a'})`
+            : '';
+          const errorMessage = result.warning
+            ? `${result.message || 'Status lookup failed.'}${providerHint} ${result.warning}`
+            : `${result.message || 'Status lookup failed.'}${providerHint}`;
+          setNotice(elements.errorMessage, 'notice-error', errorMessage);
+        } else {
+          setNotice(elements.successMessage, '', '');
+          const pendingMessage = result.warning
+            ? `${result.message || 'Payment still pending.'} ${result.warning}`
+            : (result.message || 'Payment still pending.');
+          setNotice(elements.errorMessage, 'notice-warning', pendingMessage);
+        }
+
+        await loadPayments();
+      } catch (error) {
+        setNotice(elements.successMessage, '', '');
+        setNotice(elements.errorMessage, 'notice-error', `Error checking status: ${error.message}`);
+      } finally {
+        setButtonLoading(elements.checkStatusBtn, false);
+      }
+    });
+
+    elements.refreshBtn.addEventListener('click', loadPayments);
+
+    elements.checkAccountBtn.addEventListener('click', async () => {
+      const accountId = elements.checkAccountId.value.trim();
+      if (!accountId) {
+        setNotice(elements.accountCheckResult, 'notice-warning', 'Please enter a Bakong account ID.');
+        return;
+      }
+
+      setNotice(elements.accountCheckResult, '', '');
+      setButtonLoading(elements.checkAccountBtn, true, 'Checking...');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/account/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accountId })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.exists) {
+          setNotice(elements.accountCheckResult, 'notice-success', `Account exists: ${accountId}`);
+          return;
+        }
+
+        setNotice(
+          elements.accountCheckResult,
+          'notice-error',
+          result.message || result.error || `Account not found: ${accountId}`
+        );
+      } catch (error) {
+        setNotice(elements.accountCheckResult, 'notice-error', `Error: ${error.message}`);
+      } finally {
+        setButtonLoading(elements.checkAccountBtn, false);
+      }
+    });
+
+    elements.decodeBtn.addEventListener('click', async () => {
+      setNotice(elements.errorMessage, '', '');
+      setNotice(elements.successMessage, '', '');
+
+      const qrString = elements.decodeInput.value.trim();
+      if (!qrString) {
+        elements.decodeResult.classList.remove('active');
+        setNotice(elements.errorMessage, 'notice-warning', 'Provide a KHQR payload to decode.');
+        return;
+      }
+
+      setButtonLoading(elements.decodeBtn, true, 'Decoding...');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/khqr/decode`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ qrString })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          setNotice(elements.errorMessage, 'notice-error', result.error || 'Unable to decode KHQR payload.');
+          elements.decodeResult.classList.remove('active');
+          return;
+        }
+
+        const validity = result.data.isValid ? 'Valid KHQR payload' : 'Invalid KHQR payload';
+        elements.decodeMeta.textContent = validity;
+        elements.decodeJson.textContent = JSON.stringify(result.data.decoded, null, 2);
+        elements.decodeResult.classList.add('active');
+      } catch (error) {
+        setNotice(elements.errorMessage, 'notice-error', `Error: ${error.message}`);
+        elements.decodeResult.classList.remove('active');
+      } finally {
+        setButtonLoading(elements.decodeBtn, false);
+      }
+    });
+
+    loadPayments();
+  </script>
+</body>
+</html>
