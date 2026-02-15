@@ -723,6 +723,7 @@
           <div class="button-row" style="margin-top: 14px;">
             <button id="deeplinkBtn" class="btn-secondary" style="display: none;">Open in Bakong App</button>
             <button id="checkStatusBtn">Check Payment Status</button>
+            <button id="manualCompleteBtn" class="btn-secondary" style="display: none;">Mark Paid (Demo)</button>
           </div>
         </section>
       </article>
@@ -777,6 +778,7 @@
     const API_BASE = window.location.origin;
     let currentPaymentMd5 = null;
     let deeplinkPollTimer = null;
+    let manualSettleEnabled = false;
 
     const elements = {
       generateForm: document.getElementById('generateForm'),
@@ -796,6 +798,7 @@
       displayMd5: document.getElementById('displayMd5'),
       deeplinkBtn: document.getElementById('deeplinkBtn'),
       checkStatusBtn: document.getElementById('checkStatusBtn'),
+      manualCompleteBtn: document.getElementById('manualCompleteBtn'),
       paymentsList: document.getElementById('paymentsList'),
       refreshBtn: document.getElementById('refreshBtn'),
       checkAccountId: document.getElementById('checkAccountId'),
@@ -861,6 +864,11 @@
       const resolvedStatus = mapping[status] ? status : 'pending';
       elements.displayStatus.textContent = mapping[resolvedStatus];
       elements.displayStatus.className = `status ${resolvedStatus}`;
+    };
+
+    const setManualSettleEnabled = (enabled) => {
+      manualSettleEnabled = Boolean(enabled);
+      elements.manualCompleteBtn.style.display = manualSettleEnabled ? 'block' : 'none';
     };
 
     const stopDeeplinkPolling = () => {
@@ -1011,6 +1019,7 @@
         elements.displayAmount.textContent = formatMoney(result.data.amount, result.data.currency);
         elements.displayMd5.textContent = result.data.md5;
         setStatus('pending');
+        setManualSettleEnabled(result.data.manualSettleEnabled);
 
         if (result.data.deeplinkUrl) {
           showDeeplinkButton(result.data.deeplinkUrl);
@@ -1063,6 +1072,10 @@
           stopDeeplinkPolling();
         }
 
+        if (Object.prototype.hasOwnProperty.call(result, 'manualSettleEnabled')) {
+          setManualSettleEnabled(result.manualSettleEnabled);
+        }
+
         setStatus(result.status);
 
         if (result.status === 'completed') {
@@ -1097,6 +1110,48 @@
         setNotice(elements.errorMessage, 'notice-error', `Error checking status: ${error.message}`);
       } finally {
         setButtonLoading(elements.checkStatusBtn, false);
+      }
+    });
+
+    elements.manualCompleteBtn.addEventListener('click', async () => {
+      setNotice(elements.errorMessage, '', '');
+      setNotice(elements.successMessage, '', '');
+
+      if (!manualSettleEnabled) {
+        setNotice(elements.errorMessage, 'notice-warning', 'Manual settle is disabled on server.');
+        return;
+      }
+
+      if (!currentPaymentMd5) {
+        setNotice(elements.errorMessage, 'notice-warning', 'Generate a payment before using manual settle.');
+        return;
+      }
+
+      setButtonLoading(elements.manualCompleteBtn, true, 'Marking...');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/payment/mark-paid`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ md5: currentPaymentMd5 })
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          setNotice(elements.errorMessage, 'notice-error', result.error || 'Unable to mark payment as completed.');
+          if (response.status === 403) {
+            setManualSettleEnabled(false);
+          }
+          return;
+        }
+
+        setStatus('completed');
+        setNotice(elements.successMessage, 'notice-success', result.message || 'Payment marked as completed manually.');
+        await loadPayments();
+      } catch (error) {
+        setNotice(elements.errorMessage, 'notice-error', `Manual settle failed: ${error.message}`);
+      } finally {
+        setButtonLoading(elements.manualCompleteBtn, false);
       }
     });
 
